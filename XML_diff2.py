@@ -52,8 +52,8 @@ for each in rootold.iter('test'):
 
 
 
-print (len(failurearray))
-print (len(failurearrayold))
+print (len(failurearray), "FAILURE COUNT IN LIST 1")
+print (len(failurearrayold), "FAILURE COUNT IN LIST 2")
 
 
 
@@ -76,13 +76,19 @@ for each in failurearray:
 
 print (len(samearray), "Matches found\n")
 print (len(diffarray), "Differences unchanged")
+print ("ORIGINAL FAILURES: ", len(failurearray), " LESS DUPLICATES", len(samearray), "equals: ", len(failurearray) - len(samearray))
 
 
 
 
+### end logic checks #######
 ##########
 ########
 #########
+
+
+#### START MODIFYING XML TO REMOVE DUPLICATE FAILURES IDS #########
+### THIS MERELY SETS THE FAILURE TO A MESSAGE SO NB DOESN'T GENERATE THEM ###
 
 for test in root.iter('test'):
     count = 0
@@ -90,11 +96,14 @@ for test in root.iter('test'):
         #print (test.attrib["id"], "hellow\n\n")
         ########################################
         for testmatch in rootold.iter("test"):
-            if test.attrib["id"] == testmatch.attrib["id"]:
-                count = 1
-                test.attrib["result"] = "MATCHREMOVALASFAILURE"
-        if count == 0:
-            print ("NoMatchFound")  ## might print a ton for every non Failure in the root.iter('test") that is not a failure
+            ## only compare with failures TO AVOID REMOVING FILES THAT WERE MESSAGES PREVIOUSLY
+            if testmatch.attrib["result"] =="F":
+                if test.attrib["id"] == testmatch.attrib["id"]:
+                    count = 1
+                    test.attrib["result"] = "MATCHREMOVALASFAILURE"
+    if count == 0:
+        nomatch = True
+        #print ("NoMatchFound")  ## might print a ton for every non Failure in the root.iter('test") that is not a failure
         
 
 xmldoc.write('output2.xml')
@@ -103,7 +112,7 @@ count = 0
 for each in root.iter("test"):
     if each.attrib["result"] == "MATCHREMOVALASFAILURE":
         count +=1
-        print (count, "matches found \n")
+print (count, "matches found \n")
     
 
 count = 0
