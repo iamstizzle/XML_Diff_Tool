@@ -1,14 +1,12 @@
-
+import time
 import xml.etree.ElementTree as ET
 #https://docs.python.org/2/library/xml.etree.elementtree.html
 #http://stackoverflow.com/questions/1912434/how-do-i-parse-xml-in-python
 
-
 #import your xml here. xlmdoc === values for new
 #xmldoc_old === values for old to remove same.
 xmldoc = ET.parse("testfailures.xml")
-xmldoc_old = ET.parse("testfailures1277_0006.xml")
-
+xmldoc_old = ET.parse("testfailures1277.xml")
 
 
 
@@ -17,28 +15,20 @@ root = xmldoc.getroot()
 rootold = xmldoc_old.getroot()
 
 
-
-
-
 xmldoc.write('output.xml')
 
 #print (root)
 
 
 
-### Math logic check #
-
-##########
-########
-######
-
+### Math logic check ##############################################################
+## Finds failures in each .xml file and puts them into an array for stat tallying##
+###################################################################################
 
 failurearray = []
 failurearrayold = []
 
 
-#dipping down to extrat tests that failed.
-    #appending failed tests to their own array.
 for each in root.iter('test'):
     #print (each.attrib)
     if each.attrib["result"] == "F":
@@ -51,17 +41,11 @@ for each in rootold.iter('test'):
         failurearrayold.append(each.attrib)  #IF i append each attrib as a string then the array is messy.
 
 
-
-print (len(failurearray), "FAILURE COUNT IN LIST 1")
-print (len(failurearrayold), "FAILURE COUNT IN LIST 2")
-
-
-
-
+#print (len(failurearray), "FAILURE COUNT IN LIST 1")
+#print (len(failurearrayold), "FAILURE COUNT IN LIST 2")
 
 samearray = []
 diffarray = []
-
 
 for each in failurearray:
     count = 0
@@ -76,24 +60,22 @@ for each in failurearray:
 
 print (len(samearray), "Matches found\n")
 print (len(diffarray), "Differences unchanged")
-print ("ORIGINAL FAILURES: ", len(failurearray), " LESS DUPLICATES", len(samearray), "equals: ", len(failurearray) - len(samearray))
-
-
+totalstats = str( ("ORIGINAL FAILURES: ", len(failurearray), " LESS DUPLICATES", len(samearray), "equals: ", len(failurearray) - len(samearray)) )
 
 
 ### end logic checks #######
-##########
-########
-#########
+#####################################################################################
 
 
-#### START MODIFYING XML TO REMOVE DUPLICATE FAILURES IDS #########
-### THIS MERELY SETS THE FAILURE TO A MESSAGE SO NB DOESN'T GENERATE THEM ###
+
+#### MODIFY XML FILE #########
+### TURNS DUPLICATE FAILURES INTO MESSAGES - as messages are not generated ###
+### use test.remove() if removal of failures becomes necessary ############
+### https://docs.python.org/2/library/xml.etree.elementtree.html
 
 for test in root.iter('test'):
     count = 0
     if test.attrib["result"] == "F":
-        #print (test.attrib["id"], "hellow\n\n")
         ########################################
         for testmatch in rootold.iter("test"):
             ## only compare with failures TO AVOID REMOVING FILES THAT WERE MESSAGES PREVIOUSLY
@@ -114,10 +96,15 @@ for each in root.iter("test"):
         count +=1
 print (count, "matches found \n")
     
-
 count = 0
 
+### print out summary file ###
+f = open("stats.txt", 'w')
+f.write( "Failures in file 1: %d" % (len(failurearray)))
+f.write( "\nFailures in file 2: %d" % (len(failurearrayold)))
+f.write( "\n%d duplicate test failures removed" % ((len(samearray))))
+f.write( "\n%d new failures unchanged" % ((len(diffarray))))
+f.close()
+#############################
 
-
-
-
+time.sleep(5)

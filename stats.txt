@@ -1,0 +1,4 @@
+Failures in file 1: 1043
+Failures in file 2: 883
+814 duplicate test failures removed
+229 new failures unchanged
